@@ -1,0 +1,28 @@
+{
+  "name": "dana-jo-portfolio",
+  "version": "1.0.0",
+  "description": "Premium portfolio website for Dana Jo, graphic designer — full-stack Express + SQLite",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node scripts/seed.js",
+    "dev": "node server.js",
+    "postinstall": "node scripts/restore-fonts.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.2",
+    "bcryptjs": "^2.4.3",
+    "cookie-session": "^2.1.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "method-override": "^3.0.0",
+    "multer": "^2.0.1",
+    "validator": "^13.12.0"
+  }
+}
