@@ -1,6 +1,42 @@
   </div><!-- /.main -->
 </div><!-- /.admin-shell -->
 
+<!-- floating nav dock: 3 quick actions + expand for all sections -->
+<nav class="dock" id="dock" aria-label="Admin navigation">
+  <a href="/admin" class="dock-btn <%= active === 'dashboard' ? 'on' : '' %>" aria-label="<%= t("admin_dashboard") %>">
+    <span class="dock-ic">◈</span><span class="dock-lb"><%= t("admin_dashboard") %></span>
+  </a>
+  <a href="/admin/projects" class="dock-btn <%= active === 'projects' ? 'on' : '' %>" aria-label="<%= t("admin_projects") %>">
+    <span class="dock-ic">▦</span><span class="dock-lb"><%= t("admin_projects") %></span>
+  </a>
+  <a href="/admin/messages" class="dock-btn <%= active === 'messages' ? 'on' : '' %>" aria-label="<%= t("admin_messages") %>">
+    <span class="dock-ic">☰</span><span class="dock-lb"><%= t("admin_messages") %></span>
+    <% if (typeof unread !== "undefined" && unread > 0) { %><span class="dock-badge"><%= unread %></span><% } %>
+  </a>
+  <button type="button" class="dock-btn dock-more" id="dockMore" aria-label="<%= t("admin_more") %>" aria-expanded="false">
+    <span class="dock-ic">⋯</span><span class="dock-lb"><%= t("admin_more") %></span>
+  </button>
+</nav>
+
+<!-- all-sections bottom sheet -->
+<div class="sheet-scrim" id="sheetScrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="<%= t("admin_all_sections") %>">
+  <div class="sheet-handle"></div>
+  <h3 class="sheet-title"><%= t("admin_all_sections") %></h3>
+  <div class="sheet-grid">
+    <a href="/admin" class="<%= active === 'dashboard' ? 'on' : '' %>"><i>◈</i><span><%= t("admin_dashboard") %></span></a>
+    <a href="/admin/projects" class="<%= active === 'projects' ? 'on' : '' %>"><i>▦</i><span><%= t("admin_projects") %></span></a>
+    <a href="/admin/services" class="<%= active === 'services' ? 'on' : '' %>"><i>✦</i><span><%= t("admin_services") %></span></a>
+    <a href="/admin/announcements" class="<%= active === 'announcements' ? 'on' : '' %>"><i>✉</i><span><%= t("admin_announcements") %></span></a>
+    <a href="/admin/content" class="<%= active === 'content' ? 'on' : '' %>"><i>✎</i><span><%= t("admin_content") %></span></a>
+    <a href="/admin/messages" class="<%= active === 'messages' ? 'on' : '' %>"><i>☰</i><span><%= t("admin_messages") %></span><% if (typeof unread !== "undefined" && unread > 0) { %><b class="cnt"><%= unread %></b><% } %></a>
+  </div>
+  <div class="sheet-foot">
+    <a href="/" target="_blank" rel="noopener" class="btn ghost sm">↗ <%= t("admin_view_site") %></a>
+    <form method="post" action="/admin/logout" style="margin:0"><button type="submit" class="btn sm" style="background:#a03f32;border-color:#a03f32"><%= t("admin_logout") %></button></form>
+  </div>
+</div>
+
 <!-- custom confirm modal -->
 <div class="modal-scrim" id="confirmScrim" role="dialog" aria-modal="true">
   <div class="modal">
@@ -17,19 +53,51 @@
 <script>
 (function () {
   "use strict";
-  var btn = document.getElementById("menuBtn");
-  var side = document.getElementById("sidebar");
-  var scrim = document.getElementById("scrim");
-  function close() { side.classList.remove("open"); scrim.classList.remove("on"); }
-  if (btn) btn.addEventListener("click", function () {
-    side.classList.toggle("open"); scrim.classList.toggle("on");
-  });
-  if (scrim) scrim.addEventListener("click", close);
-  side.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", close); });
 
-  /* toast auto-dismiss */
+  /* floating dock sheet */
+  var moreBtn = document.getElementById("dockMore");
+  var sheet = document.getElementById("sheet");
+  var sheetScrim = document.getElementById("sheetScrim");
+  function openSheet() {
+    sheet.classList.add("on"); sheetScrim.classList.add("on");
+    moreBtn.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+  }
+  function closeSheet() {
+    sheet.classList.remove("on"); sheetScrim.classList.remove("on");
+    moreBtn.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+  }
+  if (moreBtn) moreBtn.addEventListener("click", function () {
+    sheet.classList.contains("on") ? closeSheet() : openSheet();
+  });
+  if (sheetScrim) sheetScrim.addEventListener("click", closeSheet);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      if (sheet.classList.contains("on")) closeSheet();
+      if (cScrim.classList.contains("on")) closeConfirm();
+    }
+  });
+  /* swipe down to close sheet */
+  if (sheet) {
+    var startY = 0;
+    sheet.addEventListener("touchstart", function (e) { startY = e.touches[0].clientY; }, { passive: true });
+    sheet.addEventListener("touchend", function (e) {
+      if (e.changedTouches[0].clientY - startY > 90) closeSheet();
+    }, { passive: true });
+  }
+
+  /* toast auto-dismiss + clean URL so refresh doesn't re-show it */
   var toast = document.getElementById("toast");
   if (toast) {
+    if (window.history && window.history.replaceState) {
+      var u = new URL(window.location.href);
+      if (u.searchParams.has("toast")) {
+        u.searchParams.delete("toast");
+        u.searchParams.delete("toastType");
+        window.history.replaceState(null, "", u.pathname + u.search + u.hash);
+      }
+    }
     setTimeout(function () {
       toast.classList.add("out");
       setTimeout(function () { toast.remove(); }, 450);
@@ -46,7 +114,6 @@
   function closeConfirm() { cScrim.classList.remove("on"); pendingForm = null; }
   cNo.addEventListener("click", closeConfirm);
   cScrim.addEventListener("click", function (e) { if (e.target === cScrim) closeConfirm(); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && cScrim.classList.contains("on")) closeConfirm(); });
   cYes.addEventListener("click", function () {
     var f = pendingForm;
     cScrim.classList.remove("on"); pendingForm = null;
