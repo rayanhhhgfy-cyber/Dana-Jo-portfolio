@@ -2,6 +2,9 @@
 (function () {
   "use strict";
 
+  /* arm the reveal system: content stays visible unless JS is running */
+  document.documentElement.classList.add("js");
+
   /* full-screen mobile menu */
   var burger = document.getElementById("burger");
   var menu = document.getElementById("mobileMenu");
@@ -58,7 +61,11 @@
       { threshold: 0.1, rootMargin: "0px 0px -8% 0px" }
     );
     els.forEach(function (el) { io.observe(el); });
-  } else {
+    /* safety net: never leave content invisible (slow observer, bg tab, odd browsers) */
+    setTimeout(function () {
+      document.querySelectorAll(".reveal:not(.in)").forEach(function (el) { el.classList.add("in"); });
+    }, 2600);
+  } else if (els.length) {
     els.forEach(function (el) { el.classList.add("in"); });
   }
 
