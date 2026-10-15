@@ -1,0 +1,44 @@
+<footer class="site-footer">
+  <div class="footer-word" aria-hidden="true"><%= t("brand_first") %> <em><%= t("brand_last") %></em></div>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h4 class="footer-h"><%= t("footer_studio") %></h4>
+        <p class="footer-tag"><%= c.footer_tagline %></p>
+        <p class="footer-tag" style="margin-top:1rem"><%= t("footer_exp") %></p>
+      </div>
+      <div>
+        <h4 class="footer-h"><%= t("footer_explore") %></h4>
+        <ul class="footer-links">
+          <li><a href="/work"><%= t("nav_work") %></a></li>
+          <li><a href="/services"><%= t("nav_services") %></a></li>
+          <li><a href="/about"><%= t("nav_about") %></a></li>
+          <li><a href="/contact"><%= t("nav_contact") %></a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer-h"><%= t("footer_more") %></h4>
+        <ul class="footer-links">
+          <li><a href="/about"><%= t("footer_about_dana") %></a></li>
+          <li><a href="/contact"><%= t("footer_enquiries") %></a></li>
+          <li><a href="/admin/login"><%= t("footer_admin") %></a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer-h"><%= t("footer_connect") %></h4>
+        <div class="social-row">
+          <a href="<%= c.whatsapp_url %>" target="_blank" rel="noopener" aria-label="WhatsApp">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.3-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4 0-.5.1-.7l.4-.5c.1-.2.1-.4 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.2-.7.3-.9.9-1.1 2.2-.2 3.9a11.6 11.6 0 0 0 4.5 4.2c1.7.8 2.4.9 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.1-.4-.2z"/></svg>
+          </a>
+          <a href="<%= c.facebook_url %>" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V9.7c0-.9.3-1.6 1.7-1.6h1.5V5.2c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.7H7.8V15h2.7v7h3z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>© <%= new Date().getFullYear() %> <%= t("brand_name") %>. <%= t("footer_rights") %></span>
+      <span><%= t("footer_care") %></span>
+    </div>
+  </div>
+</footer>

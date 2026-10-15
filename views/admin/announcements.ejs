@@ -1,0 +1,51 @@
+<%- include("_top", { title: t("admin_announcements"), sub: t("ann_sub"), active: "announcements", unread }) %>
+<div class="panel">
+  <h2><%= editing ? t("ann_edit") : t("ann_new") %></h2>
+  <form method="post" action="/admin/announcements" enctype="multipart/form-data">
+    <% if (editing) { %><input type="hidden" name="id" value="<%= editing.id %>"><% } %>
+    <%- include("_dual", { id: "a-title", label: t("ann_title"), name: "title", value: editing ? editing.title : "", valueAr: editing ? editing.title_ar : "", kind: "input", attrs: 'required maxlength="200" placeholder="' + t("ph_ann_title") + '"', required: true }) %>
+    <%- include("_dual", { id: "a-body", label: t("ann_body"), name: "body", value: editing ? editing.body : "", valueAr: editing ? editing.body_ar : "", kind: "textarea", attrs: 'maxlength="10000" placeholder="' + t("ph_ann_body") + '"' }) %>
+    <div class="field">
+      <label for="a-image"><%= t("ann_image") %> <%= editing && editing.image_path ? t("ann_replace") : "" %></label>
+      <input id="a-image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+      <div class="hint"><%= t("ann_img_hint") %></div>
+      <% if (editing && editing.image_path) { %><div style="margin-top:0.6rem"><img src="<%= editing.image_path %>" alt="" style="max-width:240px;border-radius:10px"></div><% } %>
+    </div>
+    <div class="checkrow">
+      <input id="a-pub" name="published" type="checkbox" value="1" <%= !editing || editing.published ? "checked" : "" %>>
+      <label for="a-pub" style="margin:0"><%= t("svc_published") %></label>
+    </div>
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap">
+      <button class="btn sage" type="submit"><%= editing ? t("ann_save") : t("ann_add_btn") %></button>
+      <% if (editing) { %><a class="btn ghost" href="/admin/announcements"><%= t("btn_cancel") %></a><% } %>
+    </div>
+  </form>
+</div>
+<div class="panel">
+  <h2><%= t("ann_all") %> (<%= announcements.length %>)</h2>
+  <% if (announcements.length) { %>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th></th><th><%= t("th_title") %></th><th><%= t("th_status") %></th><th><%= t("th_date") %></th><th><%= t("th_actions") %></th></tr></thead>
+      <tbody>
+        <% announcements.forEach(function(a) { %>
+          <tr>
+            <td><% if (a.image_path) { %><img class="thumb" src="<%= a.image_path %>" alt=""><% } else { %><span class="thumb"></span><% } %></td>
+            <td><b><%= L(a, "title") %></b></td>
+            <td><% if (a.published) { %><span class="badge pub"><%= t("badge_published") %></span><% } else { %><span class="badge draft"><%= t("badge_draft") %></span><% } %></td>
+            <td style="white-space:nowrap"><%= a.created_at.slice(0, 16).replace("T", " ") %></td>
+            <td>
+              <div class="row-actions">
+                <a class="btn sm ghost" href="/admin/announcements?edit=<%= a.id %>"><%= t("btn_edit") %></a>
+                <form method="post" action="/admin/announcements/<%= a.id %>/toggle" style="margin:0"><button class="btn sm ghost" type="submit"><%= a.published ? t("btn_unpublish") : t("btn_publish") %></button></form>
+                <form method="post" action="/admin/announcements/<%= a.id %>/delete" style="margin:0" onsubmit="return confirm('<%= t("confirm_delete_announcement") %>')"><button class="btn sm warn-ghost" type="submit"><%= t("btn_delete") %></button></form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table></div>
+  <% } else { %>
+    <div class="empty-admin"><%= t("ann_empty") %></div>
+  <% } %>
+</div>
+<%- include("_bottom") %>

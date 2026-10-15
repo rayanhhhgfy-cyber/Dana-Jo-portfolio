@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>" dir="<%= dir %>">
+<head>
+<%- include("partials/head", { title: t("err_404_title") }) %>
+</head>
+<body>
+<%- include("partials/header", { page }) %>
+<main>
+  <section class="section">
+    <div class="wrap-narrow" style="text-align:center">
+      <span class="eyebrow" style="justify-content:center">404</span>
+      <h1 class="display"><%= t("err_404_h") %></h1>
+      <p class="lede" style="margin:1.4rem auto 2.2rem"><%= t("err_404_p") %></p>
+      <a class="btn btn-solid" href="/"><%= t("back_home") %></a>
+    </div>
+  </section>
+</main>
+<%- include("partials/footer", { c }) %>
+<script src="/js/site.js" defer></script>
+</body>
+</html>

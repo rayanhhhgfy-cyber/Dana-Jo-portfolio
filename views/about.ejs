@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>" dir="<%= dir %>">
+<head>
+<%- include("partials/head", { title: t("nav_about") }) %>
+</head>
+<body>
+<%- include("partials/header", { page }) %>
+<main>
+  <section class="section hero-pad">
+    <div class="wrap">
+      <div class="about-grid">
+        <div class="about-visual reveal" data-r="left">
+          <div class="about-mark" aria-hidden="true">D</div>
+          <div class="about-badge"><%= tf("badge_years_craft", { n: c.about_years }) %></div>
+        </div>
+        <div class="reveal" data-r="right" style="--d:.12s">
+          <span class="eyebrow"><span class="num">04</span> <%= t("eyebrow_about") %></span>
+          <h1 class="display" style="margin-bottom:1.8rem"><%= c.about_title %></h1>
+          <div class="about-body"><p><%= c.about_body %></p></div>
+          <div class="stat-band">
+            <div class="hstat"><b><%= c.about_years %></b><span><%= c.about_projects_label %></span></div>
+            <div class="hstat"><b><i><%= t("about_stat_identity") %></i></b><span><%= t("about_stat_identity_sub") %></span></div>
+            <div class="hstat"><b><i><%= t("about_stat_detail") %></i></b><span><%= t("about_stat_detail_sub") %></span></div>
+          </div>
+          <div style="margin-top:2.6rem;display:flex;gap:1rem;flex-wrap:wrap">
+            <a class="btn btn-solid" href="/work"><%= t("see_the_work") %> <span class="arr">→</span></a>
+            <a class="btn btn-ghost" href="/contact"><%= t("get_in_touch") %></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<%- include("partials/footer", { c }) %>
+<script src="/js/site.js" defer></script>
+</body>
+</html>

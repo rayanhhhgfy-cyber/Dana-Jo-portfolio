@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>" dir="<%= dir %>">
+<head>
+<%- include("partials/head", { title: t("nav_work") }) %>
+</head>
+<body>
+<%- include("partials/header", { page }) %>
+<main>
+  <section class="section hero-pad" style="padding-bottom:clamp(2.5rem,5vw,4rem)">
+    <div class="wrap">
+      <span class="eyebrow reveal"><span class="num">01</span> <%= t("eyebrow_portfolio") %></span>
+      <h1 class="display reveal" style="--d:.08s;margin-bottom:1.2rem"><%= c.work_title %></h1>
+      <p class="lede reveal" style="--d:.16s"><%= c.work_subtitle %></p>
+    </div>
+  </section>
+  <section style="padding-bottom:clamp(5rem,10vw,8rem)">
+    <div class="wrap">
+      <% if (categories.length) { %>
+      <div class="filters reveal" role="group" aria-label="<%= t("eyebrow_portfolio") %>">
+        <a class="chip <%= !activeCat ? "on" : "" %>" href="/work"><%= t("all_filter") %></a>
+        <% categories.forEach(function(cat) { %>
+          <a class="chip <%= activeCat === cat.value ? "on" : "" %>" href="/work?category=<%= encodeURIComponent(cat.value) %>"><%= cat.label %></a>
+        <% }) %>
+      </div>
+      <% } %>
+      <% if (projects.length) { %>
+        <div class="work-grid">
+          <% projects.forEach(function(p, i) { %>
+            <a class="work-card reveal" style="--d:<%= (i % 3) * 0.1 %>s" href="/work/<%= p.slug %>">
+              <span class="work-idx">№ <%= String(i + 1).padStart(2, "0") %></span>
+              <span class="work-media">
+                <% if (p.cover_image) { %><img src="<%= p.cover_image %>" alt="<%= p._title %>" loading="lazy"><% } else { %><span class="ph"><%= t("brand_name") %></span><% } %>
+              </span>
+              <span class="work-body">
+                <% if (p._category) { %><span class="work-cat"><%= p._category %></span><% } %>
+                <h3><span class="u"><%= p._title %></span></h3>
+                <span class="work-go"><%= t("view_project") %> <span class="arr">→</span></span>
+              </span>
+            </a>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty reveal">
+          <span class="glyph">✳</span>
+          <h3><%= t("empty_work_filter_title") %></h3>
+          <p><% if (activeCat) { %><%= tf("empty_work_filter_cat", { cat: activeCatLabel }) %><% } else { %><%= t("empty_work_filter_plain") %><% } %></p>
+          <% if (activeCat) { %><div style="margin-top:1.8rem"><a class="btn btn-ghost" href="/work"><%= t("show_all") %></a></div><% } %>
+        </div>
+      <% } %>
+    </div>
+  </section>
+</main>
+<%- include("partials/footer", { c }) %>
+<script src="/js/site.js" defer></script>
+</body>
+</html>

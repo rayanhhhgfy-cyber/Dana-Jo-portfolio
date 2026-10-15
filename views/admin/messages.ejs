@@ -1,0 +1,27 @@
+<%- include("_top", { title: t("admin_messages"), sub: t("msg_sub"), active: "messages", unread }) %>
+<div class="panel">
+  <h2><%= t("msg_inbox") %> (<%= messages.length %>)</h2>
+  <% if (messages.length) { %>
+    <% messages.forEach(function(m) { %>
+      <div class="msg-card <%= m.is_read ? '' : 'new' %>">
+        <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center">
+          <div>
+            <b><%= m.name %></b> · <a href="mailto:<%= m.email %>"><%= m.email %></a>
+            <div style="font-size:0.8rem;color:var(--ink-faint)"><%= m.created_at.slice(0, 16).replace("T", " ") %></div>
+          </div>
+          <div><% if (m.is_read) { %><span class="badge draft"><%= t("badge_read") %></span><% } else { %><span class="badge unread"><%= t("badge_new") %></span><% } %></div>
+        </div>
+        <div class="msg-body"><%= m.message %></div>
+        <div class="row-actions">
+          <% if (!m.is_read) { %>
+            <form method="post" action="/admin/messages/<%= m.id %>/read" style="margin:0"><button class="btn sm ghost" type="submit"><%= t("msg_mark_read") %></button></form>
+          <% } %>
+          <form method="post" action="/admin/messages/<%= m.id %>/delete" style="margin:0" onsubmit="return confirm('<%= t("confirm_delete_message") %>')"><button class="btn sm warn-ghost" type="submit"><%= t("btn_delete") %></button></form>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <div class="empty-admin"><%= t("msg_empty") %></div>
+  <% } %>
+</div>
+<%- include("_bottom") %>

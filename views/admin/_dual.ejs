@@ -1,0 +1,29 @@
+<%#
+  Dual-language field: English + Arabic side by side.
+  locals: id, label, name, value, valueAr, kind ("input"|"textarea"),
+          attrs (extra attributes string), hint (optional), required (optional),
+          suffix (arabic name suffix, default "_ar")
+%>
+<% const _suffix = typeof suffix !== "undefined" ? suffix : "_ar"; %>
+<div class="field">
+  <label for="<%= id %>"><%= label %><% if (typeof required !== "undefined" && required) { %> <i>*</i><% } %></label>
+  <div class="lang-pair">
+    <div class="lang-cell">
+      <span class="lang-tag"><%= t("lang_name_en") %></span>
+      <% if (kind === "textarea") { %>
+        <textarea id="<%= id %>" name="<%= name %>" <%= attrs %>><%= value %></textarea>
+      <% } else { %>
+        <input id="<%= id %>" name="<%= name %>" type="text" value="<%= value %>" <%= attrs %>>
+      <% } %>
+    </div>
+    <div class="lang-cell" dir="rtl">
+      <span class="lang-tag"><%= t("lang_name_ar") %></span>
+      <% if (kind === "textarea") { %>
+        <textarea id="<%= id %><%= _suffix %>" name="<%= name %><%= _suffix %>" <%= attrs %>><%= valueAr %></textarea>
+      <% } else { %>
+        <input id="<%= id %><%= _suffix %>" name="<%= name %><%= _suffix %>" type="text" value="<%= valueAr %>" <%= attrs %>>
+      <% } %>
+    </div>
+  </div>
+  <% if (typeof hint !== "undefined" && hint) { %><div class="hint"><%= hint %></div><% } %>
+</div>

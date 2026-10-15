@@ -1,0 +1,33 @@
+<%- include("_top", { title: t("admin_projects"), sub: t("proj_sub"), active: "projects", unread }) %>
+<div class="panel">
+  <div class="panel-head">
+    <h2><%= t("proj_all") %> (<%= projects.length %>)</h2>
+    <a class="btn sm sage" href="/admin/projects/new"><%= t("qa_new_project") %></a>
+  </div>
+  <% if (projects.length) { %>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th></th><th><%= t("th_title") %></th><th><%= t("th_category") %></th><th><%= t("th_status") %></th><th><%= t("th_order") %></th><th><%= t("th_actions") %></th></tr></thead>
+      <tbody>
+        <% projects.forEach(function(p) { %>
+          <tr>
+            <td><% if (p.cover_image) { %><img class="thumb" src="<%= p.cover_image %>" alt=""><% } else { %><span class="thumb"></span><% } %></td>
+            <td><b><%= L(p, "title") %></b><br><small style="color:var(--ink-faint)">/work/<%= p.slug %></small></td>
+            <td><%= L(p, "category") || "—" %></td>
+            <td><% if (p.published) { %><span class="badge pub"><%= t("badge_published") %></span><% } else { %><span class="badge draft"><%= t("badge_draft") %></span><% } %></td>
+            <td><%= p.sort_order %></td>
+            <td>
+              <div class="row-actions">
+                <a class="btn sm ghost" href="/admin/projects/<%= p.id %>/edit"><%= t("btn_edit") %></a>
+                <form method="post" action="/admin/projects/<%= p.id %>/toggle" style="margin:0"><button class="btn sm ghost" type="submit"><%= p.published ? t("btn_unpublish") : t("btn_publish") %></button></form>
+                <form method="post" action="/admin/projects/<%= p.id %>/delete" style="margin:0" onsubmit="return confirm('<%= t("confirm_delete_project") %>')"><button class="btn sm warn-ghost" type="submit"><%= t("btn_delete") %></button></form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table></div>
+  <% } else { %>
+    <div class="empty-admin"><%= t("proj_empty") %></div>
+  <% } %>
+</div>
+<%- include("_bottom") %>

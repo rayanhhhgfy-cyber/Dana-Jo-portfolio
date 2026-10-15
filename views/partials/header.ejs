@@ -1,0 +1,27 @@
+<header class="site-header" id="siteHeader">
+  <div class="wrap nav-bar">
+    <a class="brand" href="/" aria-label="<%= t("brand_name") %>"><%= t("brand_name") %> <span class="dot" aria-hidden="true"></span></a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="/" class="<%= page === 'home' ? 'active' : '' %>"><%= t("nav_home") %></a></li>
+        <li><a href="/work" class="<%= page === 'work' ? 'active' : '' %>"><%= t("nav_work") %></a></li>
+        <li><a href="/services" class="<%= page === 'services' ? 'active' : '' %>"><%= t("nav_services") %></a></li>
+        <li><a href="/about" class="<%= page === 'about' ? 'active' : '' %>"><%= t("nav_about") %></a></li>
+        <li><a href="/contact" class="<%= page === 'contact' ? 'active' : '' %>"><%= t("nav_contact") %></a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a class="lang-switch" href="/lang/<%= locale === 'ar' ? 'en' : 'ar' %>" aria-label="<%= t("lang_switch_label") %>" title="<%= t("lang_switch_label") %>"><%= t("lang_other") %></a>
+      <a class="btn btn-solid nav-cta" href="/contact" style="min-height:46px;padding:0.8rem 1.7rem"><%= t("nav_cta") %> <span class="arr">→</span></a>
+      <button class="burger" id="burger" aria-label="<%= t("open_menu") %>" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+<nav class="mobile-menu" id="mobileMenu" aria-label="Mobile">
+  <a class="lang-switch lang-switch-menu" href="/lang/<%= locale === 'ar' ? 'en' : 'ar' %>"><%= t("lang_other") %></a>
+  <a href="/"><small>01</small><%= t("nav_home") %></a>
+  <a href="/work"><small>02</small><%= t("nav_work") %></a>
+  <a href="/services"><small>03</small><%= t("nav_services") %></a>
+  <a href="/about"><small>04</small><%= t("nav_about") %></a>
+  <a href="/contact"><small>05</small><%= t("nav_contact") %></a>
+</nav>

@@ -1,0 +1,26 @@
+<%- include("_top", { title: t("admin_content"), sub: t("content_sub"), active: "content", unread }) %>
+<% if (typeof saved !== "undefined" && saved) { %><div class="alert ok"><%= t("content_saved") %></div><% } %>
+<form method="post" action="/admin/content">
+  <% groups.forEach(function(g) { const gKey = g[0], keys = g[1]; %>
+    <div class="panel">
+      <h2><%= t(gKey) %></h2>
+      <% keys.forEach(function(key) {
+        const f = fields.find(function(x) { return x[0] === key; });
+        const labelKey = f[1], hasAr = f[2];
+        const isLong = (key === "hero_subtitle" || key === "about_body");
+        const attrs = isLong ? (key === "about_body" ? 'style="min-height:180px"' : "") : "";
+      %>
+        <% if (hasAr) { %>
+          <%- include("_dual", { id: "f-" + key, label: t(labelKey), name: key, value: raw[key] || "", valueAr: raw[key + "__ar"] || "", kind: isLong ? "textarea" : "input", attrs: attrs, hint: key === "about_body" ? t("cf_para_hint") : undefined, suffix: "__ar" }) %>
+        <% } else { %>
+          <div class="field">
+            <label for="f-<%= key %>"><%= t(labelKey) %></label>
+            <input id="f-<%= key %>" name="<%= key %>" type="text" value="<%= raw[key] || "" %>" dir="ltr" style="text-align:left">
+          </div>
+        <% } %>
+      <% }) %>
+    </div>
+  <% }) %>
+  <div style="margin-bottom:2rem"><button class="btn sage" type="submit"><%= t("content_save_all") %></button></div>
+</form>
+<%- include("_bottom") %>

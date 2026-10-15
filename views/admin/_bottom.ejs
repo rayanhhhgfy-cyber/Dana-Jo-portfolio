@@ -1,0 +1,17 @@
+  </div><!-- /.main -->
+</div><!-- /.admin-shell -->
+<script>
+(function () {
+  var btn = document.getElementById("menuBtn");
+  var side = document.getElementById("sidebar");
+  var scrim = document.getElementById("scrim");
+  function close() { side.classList.remove("open"); scrim.classList.remove("on"); }
+  if (btn) btn.addEventListener("click", function () {
+    side.classList.toggle("open"); scrim.classList.toggle("on");
+  });
+  if (scrim) scrim.addEventListener("click", close);
+  side.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", close); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>" dir="<%= dir %>">
+<head>
+<%- include("partials/head", { title: t("nav_services") }) %>
+</head>
+<body>
+<%- include("partials/header", { page }) %>
+<main>
+  <section class="section hero-pad" style="padding-bottom:clamp(2.5rem,5vw,4rem)">
+    <div class="wrap">
+      <span class="eyebrow reveal"><span class="num">02</span> <%= t("eyebrow_services") %></span>
+      <h1 class="display reveal" style="--d:.08s;margin-bottom:1.2rem"><%= c.services_title %></h1>
+      <p class="lede reveal" style="--d:.16s"><%= c.services_subtitle %></p>
+    </div>
+  </section>
+  <section style="padding-bottom:clamp(5rem,10vw,8rem)">
+    <div class="wrap">
+      <% if (services.length) { %>
+        <div class="reveal" style="--d:.2s">
+          <% services.forEach(function(s, i) { %>
+            <a class="svc-row" href="/contact">
+              <span class="svc-num">0<%= i + 1 %></span>
+              <span><h3><%= s._title %></h3><p><%= s._desc %></p></span>
+              <span class="svc-arr">→</span>
+            </a>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty reveal">
+          <span class="glyph">✳</span>
+          <h3><%= t("services_empty_title") %></h3>
+          <p><%= t("services_empty_body") %></p>
+        </div>
+      <% } %>
+      <div class="reveal" style="text-align:center;margin-top:3.5rem">
+        <a class="btn btn-solid" href="/contact"><%= t("discuss_your_project") %> <span class="arr">→</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+<%- include("partials/footer", { c }) %>
+<script src="/js/site.js" defer></script>
+</body>
+</html>

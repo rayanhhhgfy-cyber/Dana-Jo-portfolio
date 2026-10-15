@@ -1,0 +1,42 @@
+<%- include("_top", { title: t("admin_dashboard"), sub: t("dash_sub"), active: "dashboard", unread }) %>
+<div class="stat-grid">
+  <div class="stat-card"><b><%= counts.projects %></b><span><%= t("stat_projects") %></span></div>
+  <div class="stat-card"><b><%= counts.published %></b><span><%= t("stat_published") %></span></div>
+  <div class="stat-card"><b><%= counts.services %></b><span><%= t("stat_services") %></span></div>
+  <div class="stat-card"><b><%= counts.announcements %></b><span><%= t("stat_announcements") %></span></div>
+  <div class="stat-card"><b><%= counts.messages %></b><span><%= t("stat_messages") %></span></div>
+  <div class="stat-card"><b><%= counts.unread %></b><span><%= t("stat_unread") %></span></div>
+</div>
+<div class="panel">
+  <div class="panel-head">
+    <h2><%= t("recent_messages") %></h2>
+    <a class="btn sm ghost" href="/admin/messages"><%= t("view_all") %></a>
+  </div>
+  <% if (recent.length) { %>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th><%= t("th_name") %></th><th><%= t("th_email") %></th><th><%= t("th_message") %></th><th><%= t("th_date") %></th><th><%= t("th_status") %></th></tr></thead>
+      <tbody>
+        <% recent.forEach(function(m) { %>
+          <tr>
+            <td><b><%= m.name %></b></td>
+            <td><%= m.email %></td>
+            <td><%= m.message.length > 70 ? m.message.slice(0, 70) + "…" : m.message %></td>
+            <td style="white-space:nowrap"><%= m.created_at.slice(0, 16).replace("T", " ") %></td>
+            <td><% if (m.is_read) { %><span class="badge draft"><%= t("badge_read") %></span><% } else { %><span class="badge unread"><%= t("badge_new") %></span><% } %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table></div>
+  <% } else { %>
+    <div class="empty-admin"><%= t("dash_no_messages") %></div>
+  <% } %>
+</div>
+<div class="panel">
+  <h2><%= t("quick_actions") %></h2>
+  <div style="display:flex;gap:0.7rem;flex-wrap:wrap">
+    <a class="btn sm sage" href="/admin/projects/new"><%= t("qa_new_project") %></a>
+    <a class="btn sm ghost" href="/admin/announcements"><%= t("qa_new_announcement") %></a>
+    <a class="btn sm ghost" href="/admin/content"><%= t("qa_edit_content") %></a>
+  </div>
+</div>
+<%- include("_bottom") %>

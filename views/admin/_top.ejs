@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>" dir="<%= dir %>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title %> · <%= t("admin_title_suffix") %></title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar" id="sidebar" aria-label="Admin navigation">
+    <div class="side-brand"><%= t("brand_name") %><small><%= t("footer_admin") %></small></div>
+    <nav class="side-nav">
+      <a href="/admin" class="<%= active === 'dashboard' ? 'on' : '' %>">◈ <%= t("admin_dashboard") %></a>
+      <a href="/admin/projects" class="<%= active === 'projects' ? 'on' : '' %>">▦ <%= t("admin_projects") %></a>
+      <a href="/admin/services" class="<%= active === 'services' ? 'on' : '' %>">✦ <%= t("admin_services") %></a>
+      <a href="/admin/announcements" class="<%= active === 'announcements' ? 'on' : '' %>">✉ <%= t("admin_announcements") %></a>
+      <a href="/admin/content" class="<%= active === 'content' ? 'on' : '' %>">✎ <%= t("admin_content") %></a>
+      <a href="/admin/messages" class="<%= active === 'messages' ? 'on' : '' %>">☰ <%= t("admin_messages") %><% if (typeof unread !== "undefined" && unread > 0) { %><span class="cnt"><%= unread %></span><% } %></a>
+    </nav>
+    <div class="side-foot">
+      <a href="/" target="_blank" rel="noopener">↗ <%= t("admin_view_site") %></a>
+      <form method="post" action="/admin/logout" style="margin:0"><button type="submit" style="width:100%"><%= t("admin_logout") %></button></form>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+  <div class="main">
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="<%= t("open_menu") %>"><span></span><span></span><span></span></button>
+      <div>
+        <h1 class="page-title"><%= title %></h1>
+        <% if (typeof sub !== "undefined" && sub) { %><p class="page-sub"><%= sub %></p><% } %>
+      </div>
+      <a class="lang-switch-admin" href="/lang/<%= locale === 'ar' ? 'en' : 'ar' %>" aria-label="<%= t("lang_switch_label") %>" title="<%= t("lang_switch_label") %>"><%= t("lang_other") %></a>
+    </div>

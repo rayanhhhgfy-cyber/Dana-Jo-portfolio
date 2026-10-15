@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>" dir="<%= dir %>">
+<head>
+<%- include("partials/head", { title: t("meta_title_suffix").split(" — ")[0] }) %>
+</head>
+<body>
+<%- include("partials/header", { page }) %>
+<main>
+  <!-- HERO -->
+  <section class="hero hero-pad">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-arch"></div>
+      <div class="hero-blob"></div>
+      <div class="hero-ring"></div>
+      <div class="hero-d">D</div>
+    </div>
+    <svg class="stamp" viewBox="0 0 120 120" aria-hidden="true">
+      <defs><path id="circ" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"/></defs>
+      <text><textPath href="#circ"><%= t("hero_stamp") %></textPath></text>
+      <text x="60" y="68" text-anchor="middle" style="font-size:26px;letter-spacing:0">✳</text>
+    </svg>
+    <div class="wrap hero-inner">
+      <span class="eyebrow"><%= c.hero_kicker %></span>
+      <h1 class="display hero-title">
+        <span class="line"><span><%= c.hero_title %></span></span>
+        <span class="line"><span class="amp" style="font-size:0.42em;letter-spacing:0"><%= t("hero_tagline_line") %></span></span>
+      </h1>
+      <p class="lede"><%= c.hero_subtitle %></p>
+      <div class="hero-ctas">
+        <a class="btn btn-solid" href="/work"><%= c.hero_cta_primary %> <span class="arr">→</span></a>
+        <a class="btn btn-ghost" href="/contact"><%= c.hero_cta_secondary %></a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><b><%= c.about_years %></b><span><%= c.about_projects_label %></span></div>
+        <div class="hstat"><b><i><%= t("stat_branding") %></i></b><span><%= t("stat_branding_sub") %></span></div>
+        <div class="hstat"><b><i><%= t("stat_print") %></i></b><span><%= t("stat_print_sub") %></span></div>
+        <div class="hstat"><b><i><%= t("stat_digital") %></i></b><span><%= t("stat_digital_sub") %></span></div>
+      </div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true"><%= t("scroll_cue") %></div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="marqueeTrack">
+      <span><%= t("mq_1") %></span><i>✳</i><span class="o"><%= t("mq_2") %></span><i>✳</i><span><%= t("mq_3") %></span><i>✳</i><span class="o"><%= t("mq_4") %></span><i>✳</i><span><%= t("mq_5") %></span><i>✳</i><span class="o"><%= t("mq_6") %></span><i>✳</i>
+    </div>
+  </div>
+  </div>
+
+  <!-- WORK -->
+  <section class="section" id="work">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow reveal"><span class="num">01</span> <%= t("eyebrow_portfolio") %></span>
+        <h2 class="display reveal" style="--d:.08s"><%= c.work_title %></h2>
+        <p class="lede reveal" style="--d:.16s"><%= c.work_subtitle %></p>
+      </div>
+      <% if (projects.length) { %>
+        <div class="work-grid">
+          <% projects.forEach(function(p, i) { %>
+            <a class="work-card reveal <%= i === 0 ? 'featured' : '' %>" style="--d:<%= (i % 3) * 0.1 %>s" href="/work/<%= p.slug %>">
+              <span class="work-idx">№ <%= String(i + 1).padStart(2, "0") %></span>
+              <span class="work-media">
+                <% if (p.cover_image) { %><img src="<%= p.cover_image %>" alt="<%= p._title %>" loading="lazy"><% } else { %><span class="ph"><%= t("brand_name") %></span><% } %>
+              </span>
+              <span class="work-body">
+                <% if (p._category) { %><span class="work-cat"><%= p._category %></span><% } %>
+                <h3><span class="u"><%= p._title %></span></h3>
+                <span class="work-go"><%= t("view_project") %> <span class="arr">→</span></span>
+              </span>
+            </a>
+          <% }) %>
+        </div>
+        <div style="text-align:center;margin-top:3rem" class="reveal">
+          <a class="btn btn-ghost" href="/work"><%= t("view_all_work") %> <span class="arr">→</span></a>
+        </div>
+      <% } else { %>
+        <div class="empty reveal">
+          <span class="glyph">✳</span>
+          <h3><%= t("empty_work_title") %></h3>
+          <p><%= t("empty_work_body") %></p>
+          <div style="margin-top:1.8rem"><a class="btn btn-solid" href="/contact"><%= t("get_in_touch") %> <span class="arr">→</span></a></div>
+        </div>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section" style="background:var(--white);border-block:1px solid var(--line-soft)">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow reveal"><span class="num">02</span> <%= t("eyebrow_services") %></span>
+        <h2 class="display reveal" style="--d:.08s"><%= c.services_title %></h2>
+        <p class="lede reveal" style="--d:.16s"><%= c.services_subtitle %></p>
+      </div>
+      <div class="reveal" style="--d:.2s">
+        <% services.forEach(function(s, i) { %>
+          <a class="svc-row" href="/contact">
+            <span class="svc-num">0<%= i + 1 %></span>
+            <span><h3><%= s._title %></h3><p><%= s._desc %></p></span>
+            <span class="svc-arr">→</span>
+          </a>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANNOUNCEMENTS -->
+  <% if (announcements.length) { %>
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow reveal"><span class="num">03</span> <%= t("eyebrow_news") %></span>
+        <h2 class="display reveal" style="--d:.08s"><%= t("announcements_heading") %></h2>
+      </div>
+      <div class="work-grid" style="grid-template-columns:1fr">
+        <% announcements.forEach(function(a, i) { %>
+          <article class="announce reveal" style="--d:<%= i * 0.1 %>s">
+            <div class="announce-media"><% if (a.image_path) { %><img src="<%= a.image_path %>" alt="<%= a._title %>" loading="lazy"><% } %></div>
+            <div class="announce-body">
+              <span class="eyebrow"><%= t("announcement_label") %></span>
+              <h3><%= a._title %></h3>
+              <p><%= a._body %></p>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+  <% } %>
+
+  <!-- ABOUT -->
+  <section class="section">
+    <div class="wrap">
+      <div class="about-grid">
+        <div class="about-visual reveal" data-r="left">
+          <div class="about-mark" aria-hidden="true">D</div>
+          <div class="about-badge"><%= tf("badge_years_craft", { n: c.about_years }) %></div>
+        </div>
+        <div class="reveal" data-r="right" style="--d:.12s">
+          <span class="eyebrow"><span class="num">04</span> <%= t("eyebrow_about") %></span>
+          <h2 class="display" style="margin-bottom:1.5rem"><%= c.about_title %></h2>
+          <p class="about-statement"><%= c.about_body.split("\n")[0] %></p>
+          <div style="margin-top:2.2rem;display:flex;gap:1rem;flex-wrap:wrap">
+            <a class="btn btn-solid" href="/about"><%= t("read_more") %> <span class="arr">→</span></a>
+            <a class="btn btn-ghost" href="/work"><%= t("see_the_work") %></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="announce reveal" data-r="scale" style="background:linear-gradient(140deg,var(--sage-deep),var(--sage))">
+        <div class="announce-body" style="grid-column:1/-1;text-align:center;padding:clamp(3.5rem,8vw,5.5rem) clamp(1.5rem,5vw,4rem)">
+          <span class="eyebrow" style="justify-content:center;color:var(--ivory)"><%= t("cta_eyebrow") %></span>
+          <h2 class="display" style="color:var(--ivory);margin-bottom:1.2rem"><%= t("cta_title_a") %> <em style="color:var(--sand)"><%= t("cta_title_b") %></em></h2>
+          <p style="max-width:52ch;margin:0 auto 2.2rem"><%= t("cta_body") %></p>
+          <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+            <a class="btn btn-solid" href="/contact"><%= t("send_a_message") %> <span class="arr">→</span></a>
+            <a class="btn btn-light" href="<%= c.whatsapp_url %>" target="_blank" rel="noopener">WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<%- include("partials/footer", { c }) %>
+<script src="/js/site.js" defer></script>
+</body>
+</html>

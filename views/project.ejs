@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>" dir="<%= dir %>">
+<head>
+<%- include("partials/head", { title: project._title }) %>
+</head>
+<body>
+<%- include("partials/header", { page }) %>
+<main>
+  <section class="pd-hero">
+    <div class="wrap-narrow">
+      <a class="back-link" href="/work"><span class="arr">←</span> <%= t("back_to_work") %></a>
+      <% if (project._category) { %><span class="eyebrow reveal"><%= project._category %></span><% } %>
+      <h1 class="display reveal" style="--d:.08s"><%= project._title %></h1>
+      <ul class="pd-facts reveal" style="--d:.16s">
+        <li><span><%= t("fact_designer") %></span><b><%= t("brand_name") %></b></li>
+        <% if (project._category) { %><li><span><%= t("fact_category") %></span><b><%= project._category %></b></li><% } %>
+      </ul>
+    </div>
+  </section>
+  <div class="wrap">
+    <% if (project.cover_image) { %>
+      <div class="pd-cover reveal" data-r="scale"><img src="<%= project.cover_image %>" alt="<%= project._title %>"></div>
+    <% } %>
+    <% if (project._desc) { %>
+      <div class="wrap-narrow" style="margin-bottom:1rem"><div class="prose reveal"><%= project._desc %></div></div>
+    <% } %>
+    <% if (project.images.length) { %>
+      <div class="pd-gallery">
+        <% project.images.forEach(function(im, i) { %>
+          <figure class="reveal <%= i === 0 && project.images.length > 2 ? 'wide' : '' %>" style="--d:<%= (i % 2) * 0.1 %>s">
+            <img src="<%= im.image_path %>" alt="<%= im._caption || project._title %>" loading="lazy">
+            <% if (im._caption) { %><figcaption><%= im._caption %></figcaption><% } %>
+          </figure>
+        <% }) %>
+      </div>
+    <% } %>
+    <% if (others.length) { %>
+      <section class="section" style="padding-top:1rem">
+        <div class="sec-head reveal">
+          <span class="eyebrow"><span class="num">✳</span> <%= t("keep_exploring") %></span>
+          <h2 class="display"><%= t("other_projects") %></h2>
+        </div>
+        <div class="work-grid">
+          <% others.forEach(function(p, i) { %>
+            <a class="work-card reveal" style="--d:<%= (i % 3) * 0.1 %>s" href="/work/<%= p.slug %>">
+              <span class="work-idx">№ <%= String(i + 1).padStart(2, "0") %></span>
+              <span class="work-media">
+                <% if (p.cover_image) { %><img src="<%= p.cover_image %>" alt="<%= p._title %>" loading="lazy"><% } else { %><span class="ph"><%= t("brand_name") %></span><% } %>
+              </span>
+              <span class="work-body">
+                <% if (p._category) { %><span class="work-cat"><%= p._category %></span><% } %>
+                <h3><span class="u"><%= p._title %></span></h3>
+                <span class="work-go"><%= t("view_project") %> <span class="arr">→</span></span>
+              </span>
+            </a>
+          <% }) %>
+        </div>
+      </section>
+    <% } %>
+    <div class="reveal" style="text-align:center;padding:1rem 0 2rem">
+      <a class="btn btn-solid" href="/contact"><%= t("start_your_project") %> <span class="arr">→</span></a>
+    </div>
+  </div>
+</main>
+<%- include("partials/footer", { c }) %>
+<script src="/js/site.js" defer></script>
+</body>
+</html>

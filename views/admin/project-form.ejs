@@ -1,0 +1,76 @@
+<%- include("_top", { title: project ? t("pf_edit") : t("pf_new"), sub: project ? L(project, "title") : t("pf_new_sub"), active: "projects", unread }) %>
+<% if (error) { %><div class="alert err"><%= error %></div><% } %>
+<form method="post" action="<%= project ? '/admin/projects/' + project.id : '/admin/projects' %>" enctype="multipart/form-data">
+  <div class="panel">
+    <h2><%= t("pf_details") %></h2>
+    <%- include("_dual", { id: "title", label: t("pf_title"), name: "title", value: project ? project.title : "", valueAr: project ? project.title_ar : "", kind: "input", attrs: 'required maxlength="160" placeholder="' + t("ph_project_title") + '"', required: true }) %>
+    <%- include("_dual", { id: "category", label: t("pf_category"), name: "category", value: project ? project.category : "", valueAr: project ? project.category_ar : "", kind: "input", attrs: 'maxlength="80" placeholder="' + t("ph_project_category") + '"', hint: t("pf_category_hint") }) %>
+    <%- include("_dual", { id: "description", label: t("pf_description"), name: "description", value: project ? project.description : "", valueAr: project ? project.description_ar : "", kind: "textarea", attrs: 'maxlength="20000" placeholder="' + t("ph_project_desc") + '"' }) %>
+    <div class="form-grid">
+      <div class="field">
+        <label for="sort_order"><%= t("pf_sort") %></label>
+        <input id="sort_order" name="sort_order" type="number" value="<%= project ? project.sort_order : 0 %>">
+        <div class="hint"><%= t("pf_sort_hint") %></div>
+      </div>
+      <div class="checkrow" style="align-self:end">
+        <input id="published" name="published" type="checkbox" value="1" <%= project && project.published ? "checked" : "" %>>
+        <label for="published" style="margin:0"><%= t("pf_published") %></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2><%= t("pf_cover") %></h2>
+    <% if (project && project.cover_image) { %>
+      <div style="margin-bottom:1rem"><img src="<%= project.cover_image %>" alt="" style="max-width:320px;border-radius:10px;border:1px solid var(--line-soft)"></div>
+    <% } %>
+    <div class="field">
+      <label for="cover"><%= project && project.cover_image ? t("pf_cover_replace") : t("pf_cover_upload") %></label>
+      <input id="cover" name="cover" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+      <div class="hint"><%= t("pf_img_hint") %></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2><%= t("pf_gallery") %></h2>
+    <div class="field">
+      <label for="gallery"><%= t("pf_gallery_add") %></label>
+      <input id="gallery" name="gallery" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif">
+      <div class="hint"><%= t("pf_gallery_hint") %></div>
+    </div>
+    <% if (project && project.images.length) { %>
+      <div class="img-grid">
+        <% project.images.forEach(function(im) { %>
+          <div class="img-card">
+            <img src="<%= im.image_path %>" alt="" loading="lazy">
+            <div class="cap">
+              <form method="post" action="/admin/images/<%= im.id %>/caption" style="margin:0">
+                <div class="lang-pair" style="margin-bottom:0.4rem">
+                  <input type="text" name="caption" value="<%= im.caption %>" placeholder="<%= t("pf_caption_ph") %>" maxlength="200" aria-label="Caption">
+                  <input type="text" name="caption_ar" value="<%= im.caption_ar %>" placeholder="<%= t("pf_caption_ph") %>" maxlength="200" dir="rtl" aria-label="Caption AR">
+                </div>
+                <button class="btn sm ghost" type="submit" title="Save" style="width:100%">✓</button>
+              </form>
+              <form method="post" action="/admin/images/<%= im.id %>/delete" style="margin:0" onsubmit="return confirm('<%= t("confirm_delete_image") %>')">
+                <button class="btn sm warn-ghost" type="submit" style="width:100%"><%= t("btn_delete") %></button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else if (project) { %>
+      <div class="empty-admin"><%= t("pf_gallery_empty") %></div>
+    <% } %>
+  </div>
+
+  <div style="display:flex;gap:0.8rem;margin-bottom:2rem;flex-wrap:wrap">
+    <button class="btn sage" type="submit"><%= project ? t("pf_save") : t("pf_create") %></button>
+    <a class="btn ghost" href="/admin/projects"><%= t("btn_cancel") %></a>
+  </div>
+</form>
+<% if (project && project.cover_image) { %>
+<form method="post" action="/admin/projects/<%= project.id %>/cover-clear" onsubmit="return confirm('<%= t("confirm_remove_cover") %>')" style="margin:-1rem 0 2rem">
+  <button class="btn sm warn-ghost" type="submit"><%= t("pf_remove_cover") %></button>
+</form>
+<% } %>
+<%- include("_bottom") %>
