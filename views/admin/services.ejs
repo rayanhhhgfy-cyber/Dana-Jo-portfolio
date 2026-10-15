@@ -46,4 +46,4 @@
     <div class="empty-admin"><%= t("svc_empty") %></div>
   <% } %>
 </div>
-<%- include("_bottom") %>
+<%- include("_bottom", { active: "services", unread: typeof unread !== "undefined" ? unread : 0 }) %>
