@@ -77,6 +77,7 @@ app.use((req, res, next) => {
   }
   res.locals.locale = locale;
   res.locals.dir = dirOf(locale);
+  res.locals.currentPath = req.path || "/";
   res.locals.t = (k) => t(k, locale);
   res.locals.tf = (k, v) => tf(k, locale, v);
   res.locals.L = (row, field) => L(row, field, locale);
@@ -87,6 +88,11 @@ app.use((req, res, next) => {
 app.get("/lang/:l", (req, res) => {
   const l = req.params.l === "ar" ? "ar" : "en";
   res.cookie(LANG_COOKIE, l, LANG_COOKIE_OPTS);
+  // stay on the same page: explicit ?next= wins, then referer, then home
+  const nx = req.query.next;
+  if (typeof nx === "string" && nx.startsWith("/") && !nx.startsWith("//")) {
+    return res.redirect(nx);
+  }
   const back = req.get("referer");
   if (back) {
     try {
@@ -127,20 +133,18 @@ function handleUploadSingle(name) {
   };
 }
 
-/* ---------- toast notifications (via session, shown once) ---------- */
-function setToast(req, type, msgKey) {
-  if (req.session) req.session.toast = { type, msgKey };
-}
-function pullToast(req) {
-  const t = req.session && req.session.toast;
-  if (req.session) req.session.toast = null;
-  return t || null;
+/* ---------- toast notifications (stateless, via ?toast= query param) ---------- */
+function toastRedirect(res, url, msgKey, type) {
+  const t = type || (msgKey === "file_too_large" || msgKey === "upload_failed" ? "error" : "ok");
+  const sep = url.includes("?") ? "&" : "?";
+  return res.redirect(url + sep + "toast=" + encodeURIComponent(msgKey) + "&toastType=" + t);
 }
 
 /* ---------- helpers ---------- */
 function requireAdmin(req, res, next) {
   if (req.session && req.session.adminId) {
-    res.locals.toast = pullToast(req);
+    res.locals.toastKey = req.query.toast || null;
+    res.locals.toastType = req.query.toastType === "error" ? "error" : "ok";
     return next();
   }
   if (req.path.startsWith("/api/")) return res.status(401).json({ ok: false, error: t("err_unauthorized", res.locals.locale) });
@@ -324,8 +328,7 @@ app.post("/admin/projects", requireAdmin, handleUpload([{ name: "cover", maxCoun
       sort_order: parseInt(req.body.sort_order, 10) || 0,
     });
     await store.addProjectImages(id, galleryPaths.map((p, i) => ({ image_path: p, sort_order: i })));
-    setToast(req, "ok", "toast_saved");
-    res.redirect(`/admin/projects/${id}/edit`);
+        return toastRedirect(res, `/admin/projects/${id}/edit`, "toast_saved");
   } catch (e) { next(e); }
 });
 app.get("/admin/projects/:id/edit", requireAdmin, async (req, res, next) => {
@@ -364,8 +367,7 @@ app.post("/admin/projects/:id", requireAdmin, handleUpload([{ name: "cover", max
       const maxSort = await store.maxImageSort(project.id);
       await store.addProjectImages(project.id, galleryPaths.map((p, i) => ({ image_path: p, sort_order: maxSort + 1 + i })));
     }
-    setToast(req, "ok", "toast_saved");
-    res.redirect(`/admin/projects/${project.id}/edit`);
+        return toastRedirect(res, `/admin/projects/${project.id}/edit`, "toast_saved");
   } catch (e) { next(e); }
 });
 app.post("/admin/projects/:id/delete", requireAdmin, async (req, res, next) => {
@@ -375,15 +377,13 @@ app.post("/admin/projects/:id/delete", requireAdmin, async (req, res, next) => {
       await deleteUpload(project.cover_image);
       for (const im of project.images || []) await deleteUpload(im.image_path);
     }
-    setToast(req, "ok", "toast_deleted");
-    res.redirect("/admin/projects");
+        return toastRedirect(res, "/admin/projects", "toast_deleted");
   } catch (e) { next(e); }
 });
 app.post("/admin/projects/:id/toggle", requireAdmin, async (req, res, next) => {
   try {
     const pub = await store.toggleProjectPublish(req.params.id);
-    setToast(req, "ok", pub ? "toast_published" : "toast_unpublished");
-    res.redirect("/admin/projects");
+        return toastRedirect(res, "/admin/projects", pub ? "toast_published" : "toast_unpublished");
   } catch (e) { next(e); }
 });
 app.post("/admin/projects/:id/cover-clear", requireAdmin, async (req, res, next) => {
@@ -393,8 +393,7 @@ app.post("/admin/projects/:id/cover-clear", requireAdmin, async (req, res, next)
       await deleteUpload(project.cover_image);
       await store.updateProject(project.id, { ...project, cover_image: "" });
     }
-    setToast(req, "ok", "toast_saved");
-    res.redirect(`/admin/projects/${req.params.id}/edit`);
+        return toastRedirect(res, `/admin/projects/${req.params.id}/edit`, "toast_saved");
   } catch (e) { next(e); }
 });
 app.post("/admin/images/:id/delete", requireAdmin, async (req, res, next) => {
@@ -402,8 +401,7 @@ app.post("/admin/images/:id/delete", requireAdmin, async (req, res, next) => {
     const img = await store.deleteProjectImage(req.params.id);
     if (img) {
       await deleteUpload(img.image_path);
-      setToast(req, "ok", "toast_deleted");
-      return res.redirect(`/admin/projects/${img.project_id}/edit`);
+      return toastRedirect(res, `/admin/projects/${img.project_id}/edit`, "toast_deleted");
     }
     res.redirect("/admin/projects");
   } catch (e) { next(e); }
@@ -441,19 +439,17 @@ app.post("/admin/services", requireAdmin, async (req, res, next) => {
     };
     if (req.body.id) await store.updateService(req.body.id, data);
     else await store.createService(data);
-    setToast(req, "ok", "toast_saved");
-    res.redirect("/admin/services");
+        return toastRedirect(res, "/admin/services", "toast_saved");
   } catch (e) { next(e); }
 });
 app.post("/admin/services/:id/delete", requireAdmin, async (req, res, next) => {
-  try { await store.deleteService(req.params.id); setToast(req, "ok", "toast_deleted"); res.redirect("/admin/services"); }
+  try { await store.deleteService(req.params.id); return toastRedirect(res, "/admin/services", "toast_deleted"); }
   catch (e) { next(e); }
 });
 app.post("/admin/services/:id/toggle", requireAdmin, async (req, res, next) => {
   try {
     const pub = await store.toggleService(req.params.id);
-    setToast(req, "ok", pub ? "toast_published" : "toast_unpublished");
-    res.redirect("/admin/services");
+        return toastRedirect(res, "/admin/services", pub ? "toast_published" : "toast_unpublished");
   } catch (e) { next(e); }
 });
 
@@ -469,8 +465,8 @@ app.get("/admin/announcements", requireAdmin, async (req, res, next) => {
 app.post("/admin/announcements", requireAdmin, handleUploadSingle("image"), async (req, res, next) => {
   try {
     if (req.uploadError) {
-      setToast(req, "error", req.uploadError);
-      return res.redirect("/admin/announcements" + (req.body.id ? `?edit=${req.body.id}` : ""));
+      const base = "/admin/announcements" + (req.body.id ? `?edit=${req.body.id}` : "");
+      return toastRedirect(res, base, req.uploadError, "error");
     }
     const title = esc(req.body.title).trim().slice(0, 200);
     if (!title) return res.redirect("/admin/announcements");
@@ -489,23 +485,20 @@ app.post("/admin/announcements", requireAdmin, handleUploadSingle("image"), asyn
     } else {
       await store.createAnnouncement({ ...data, image_path: paths[0] || "" });
     }
-    setToast(req, "ok", "toast_saved");
-    res.redirect("/admin/announcements");
+        return toastRedirect(res, "/admin/announcements", "toast_saved");
   } catch (e) { next(e); }
 });
 app.post("/admin/announcements/:id/delete", requireAdmin, async (req, res, next) => {
   try {
     const a = await store.deleteAnnouncement(req.params.id);
     if (a) await deleteUpload(a.image_path);
-    setToast(req, "ok", "toast_deleted");
-    res.redirect("/admin/announcements");
+        return toastRedirect(res, "/admin/announcements", "toast_deleted");
   } catch (e) { next(e); }
 });
 app.post("/admin/announcements/:id/toggle", requireAdmin, async (req, res, next) => {
   try {
     const pub = await store.toggleAnnouncement(req.params.id);
-    setToast(req, "ok", pub ? "toast_published" : "toast_unpublished");
-    res.redirect("/admin/announcements");
+        return toastRedirect(res, "/admin/announcements", pub ? "toast_published" : "toast_unpublished");
   } catch (e) { next(e); }
 });
 
@@ -546,8 +539,7 @@ app.post("/admin/content", requireAdmin, async (req, res, next) => {
       if (hasAr && key + "__ar" in req.body) entries[key + "__ar"] = esc(req.body[key + "__ar"]).slice(0, 20000);
     }
     await store.setContent(entries);
-    setToast(req, "ok", "toast_saved");
-    res.redirect("/admin/content");
+        return toastRedirect(res, "/admin/content", "toast_saved");
   } catch (e) { next(e); }
 });
 
@@ -561,7 +553,7 @@ app.post("/admin/messages/:id/read", requireAdmin, async (req, res, next) => {
   catch (e) { next(e); }
 });
 app.post("/admin/messages/:id/delete", requireAdmin, async (req, res, next) => {
-  try { await store.deleteMessage(req.params.id); setToast(req, "ok", "toast_deleted"); res.redirect("/admin/messages"); }
+  try { await store.deleteMessage(req.params.id); return toastRedirect(res, "/admin/messages", "toast_deleted"); }
   catch (e) { next(e); }
 });
 
