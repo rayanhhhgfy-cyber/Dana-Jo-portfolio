@@ -1,7 +1,22 @@
   </div><!-- /.main -->
 </div><!-- /.admin-shell -->
+
+<!-- custom confirm modal -->
+<div class="modal-scrim" id="confirmScrim" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="m-ic">!</div>
+    <h3 id="confirmTitle"></h3>
+    <p id="confirmBody"></p>
+    <div class="m-actions">
+      <button type="button" class="btn ghost" id="confirmNo"></button>
+      <button type="button" class="btn" id="confirmYes" style="background:#a03f32;border-color:#a03f32"></button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
+  "use strict";
   var btn = document.getElementById("menuBtn");
   var side = document.getElementById("sidebar");
   var scrim = document.getElementById("scrim");
@@ -11,6 +26,55 @@
   });
   if (scrim) scrim.addEventListener("click", close);
   side.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", close); });
+
+  /* toast auto-dismiss */
+  var toast = document.getElementById("toast");
+  if (toast) {
+    setTimeout(function () {
+      toast.classList.add("out");
+      setTimeout(function () { toast.remove(); }, 450);
+    }, 3400);
+  }
+
+  /* custom confirm modal — replaces native confirm() */
+  var cScrim = document.getElementById("confirmScrim");
+  var cTitle = document.getElementById("confirmTitle");
+  var cBody = document.getElementById("confirmBody");
+  var cNo = document.getElementById("confirmNo");
+  var cYes = document.getElementById("confirmYes");
+  var pendingForm = null;
+  function closeConfirm() { cScrim.classList.remove("on"); pendingForm = null; }
+  cNo.addEventListener("click", closeConfirm);
+  cScrim.addEventListener("click", function (e) { if (e.target === cScrim) closeConfirm(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && cScrim.classList.contains("on")) closeConfirm(); });
+  cYes.addEventListener("click", function () {
+    var f = pendingForm;
+    cScrim.classList.remove("on"); pendingForm = null;
+    if (f) f.submit();
+  });
+  document.querySelectorAll("form[data-confirm]").forEach(function (form) {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      pendingForm = form;
+      cTitle.textContent = form.dataset.confirmTitle || "";
+      cBody.textContent = form.dataset.confirm || "";
+      cNo.textContent = form.dataset.confirmNo || "Cancel";
+      cYes.textContent = form.dataset.confirmYes || "Delete";
+      cScrim.classList.add("on");
+    });
+  });
+
+  /* double-submit protection */
+  document.querySelectorAll("form:not([data-confirm])").forEach(function (form) {
+    form.addEventListener("submit", function () {
+      var btns = form.querySelectorAll('button[type="submit"]');
+      btns.forEach(function (b) {
+        b.disabled = true;
+        b.style.opacity = "0.6";
+        b.style.pointerEvents = "none";
+      });
+    });
+  });
 })();
 </script>
 </body>

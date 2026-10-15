@@ -41,8 +41,19 @@ app.use(
   })
 );
 
-const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: "draft-7" });
-const contactLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 30, standardHeaders: "draft-7" });
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, max: 20, standardHeaders: "draft-7",
+  handler: (req, res) => res.status(429).render("admin/login", {
+    error: t("too_many_attempts", res.locals.locale), email: "",
+  }),
+});
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 30, standardHeaders: "draft-7",
+  handler: async (req, res) => res.status(429).render("contact", {
+    c: await contentFor(res.locals.locale), page: "contact",
+    sent: false, error: t("too_many_attempts", res.locals.locale),
+  }),
+});
 
 /* ---------- i18n middleware ---------- */
 const LANG_COOKIE = "dj_lang";
@@ -93,10 +104,45 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024, files: 12 },
   fileFilter: (_req, file, cb) => cb(null, ALLOWED_MIME.has(file.mimetype)),
 });
+/* Wrap multer so oversized/rejected files become a friendly form error
+   instead of an ugly 500 page. */
+function handleUpload(fields) {
+  const mw = upload.fields(fields);
+  return (req, res, next) => {
+    mw(req, res, (err) => {
+      if (err) req.uploadError = err.code === "LIMIT_FILE_SIZE" ? "file_too_large" : "upload_failed";
+      next();
+    });
+  };
+}
+function handleUploadSingle(name) {
+  const mw = upload.single(name);
+  return (req, res, next) => {
+    mw(req, res, (err) => {
+      if (err) req.uploadError = err.code === "LIMIT_FILE_SIZE" ? "file_too_large" : "upload_failed";
+      // normalize: expose as req.files for uniform handling
+      if (req.file && !req.files) req.files = { [name]: [req.file] };
+      next();
+    });
+  };
+}
+
+/* ---------- toast notifications (via session, shown once) ---------- */
+function setToast(req, type, msgKey) {
+  if (req.session) req.session.toast = { type, msgKey };
+}
+function pullToast(req) {
+  const t = req.session && req.session.toast;
+  if (req.session) req.session.toast = null;
+  return t || null;
+}
 
 /* ---------- helpers ---------- */
 function requireAdmin(req, res, next) {
-  if (req.session && req.session.adminId) return next();
+  if (req.session && req.session.adminId) {
+    res.locals.toast = pullToast(req);
+    return next();
+  }
   if (req.path.startsWith("/api/")) return res.status(401).json({ ok: false, error: t("err_unauthorized", res.locals.locale) });
   return res.redirect("/admin/login");
 }
@@ -257,9 +303,10 @@ app.get("/admin/projects", requireAdmin, async (_req, res, next) => {
 app.get("/admin/projects/new", requireAdmin, (_req, res) => {
   res.render("admin/project-form", { project: null, error: "" });
 });
-app.post("/admin/projects", requireAdmin, upload.fields([{ name: "cover", maxCount: 1 }, { name: "gallery", maxCount: 10 }]), async (req, res, next) => {
+app.post("/admin/projects", requireAdmin, handleUpload([{ name: "cover", maxCount: 1 }, { name: "gallery", maxCount: 10 }]), async (req, res, next) => {
   try {
     const locale = res.locals.locale;
+    if (req.uploadError) return res.status(400).render("admin/project-form", { project: null, error: t(req.uploadError, locale) });
     const title = esc(req.body.title).trim().slice(0, 160);
     if (!title) return res.status(400).render("admin/project-form", { project: null, error: t("pf_title_required", locale) });
     const slug = await store.uniqueSlug(title);
@@ -277,6 +324,7 @@ app.post("/admin/projects", requireAdmin, upload.fields([{ name: "cover", maxCou
       sort_order: parseInt(req.body.sort_order, 10) || 0,
     });
     await store.addProjectImages(id, galleryPaths.map((p, i) => ({ image_path: p, sort_order: i })));
+    setToast(req, "ok", "toast_saved");
     res.redirect(`/admin/projects/${id}/edit`);
   } catch (e) { next(e); }
 });
@@ -287,11 +335,12 @@ app.get("/admin/projects/:id/edit", requireAdmin, async (req, res, next) => {
     res.render("admin/project-form", { project, error: "" });
   } catch (e) { next(e); }
 });
-app.post("/admin/projects/:id", requireAdmin, upload.fields([{ name: "cover", maxCount: 1 }, { name: "gallery", maxCount: 10 }]), async (req, res, next) => {
+app.post("/admin/projects/:id", requireAdmin, handleUpload([{ name: "cover", maxCount: 1 }, { name: "gallery", maxCount: 10 }]), async (req, res, next) => {
   try {
     const locale = res.locals.locale;
     const project = await store.getProjectById(req.params.id);
     if (!project) return res.status(404).send(t("err_project_not_found", locale));
+    if (req.uploadError) return res.status(400).render("admin/project-form", { project, error: t(req.uploadError, locale) });
     const title = esc(req.body.title).trim().slice(0, 160);
     if (!title) return res.status(400).render("admin/project-form", { project, error: t("pf_title_required", locale) });
     let cover = project.cover_image;
@@ -315,6 +364,7 @@ app.post("/admin/projects/:id", requireAdmin, upload.fields([{ name: "cover", ma
       const maxSort = await store.maxImageSort(project.id);
       await store.addProjectImages(project.id, galleryPaths.map((p, i) => ({ image_path: p, sort_order: maxSort + 1 + i })));
     }
+    setToast(req, "ok", "toast_saved");
     res.redirect(`/admin/projects/${project.id}/edit`);
   } catch (e) { next(e); }
 });
@@ -325,12 +375,16 @@ app.post("/admin/projects/:id/delete", requireAdmin, async (req, res, next) => {
       await deleteUpload(project.cover_image);
       for (const im of project.images || []) await deleteUpload(im.image_path);
     }
+    setToast(req, "ok", "toast_deleted");
     res.redirect("/admin/projects");
   } catch (e) { next(e); }
 });
 app.post("/admin/projects/:id/toggle", requireAdmin, async (req, res, next) => {
-  try { await store.toggleProjectPublish(req.params.id); res.redirect("/admin/projects"); }
-  catch (e) { next(e); }
+  try {
+    const pub = await store.toggleProjectPublish(req.params.id);
+    setToast(req, "ok", pub ? "toast_published" : "toast_unpublished");
+    res.redirect("/admin/projects");
+  } catch (e) { next(e); }
 });
 app.post("/admin/projects/:id/cover-clear", requireAdmin, async (req, res, next) => {
   try {
@@ -339,6 +393,7 @@ app.post("/admin/projects/:id/cover-clear", requireAdmin, async (req, res, next)
       await deleteUpload(project.cover_image);
       await store.updateProject(project.id, { ...project, cover_image: "" });
     }
+    setToast(req, "ok", "toast_saved");
     res.redirect(`/admin/projects/${req.params.id}/edit`);
   } catch (e) { next(e); }
 });
@@ -347,6 +402,7 @@ app.post("/admin/images/:id/delete", requireAdmin, async (req, res, next) => {
     const img = await store.deleteProjectImage(req.params.id);
     if (img) {
       await deleteUpload(img.image_path);
+      setToast(req, "ok", "toast_deleted");
       return res.redirect(`/admin/projects/${img.project_id}/edit`);
     }
     res.redirect("/admin/projects");
@@ -385,16 +441,20 @@ app.post("/admin/services", requireAdmin, async (req, res, next) => {
     };
     if (req.body.id) await store.updateService(req.body.id, data);
     else await store.createService(data);
+    setToast(req, "ok", "toast_saved");
     res.redirect("/admin/services");
   } catch (e) { next(e); }
 });
 app.post("/admin/services/:id/delete", requireAdmin, async (req, res, next) => {
-  try { await store.deleteService(req.params.id); res.redirect("/admin/services"); }
+  try { await store.deleteService(req.params.id); setToast(req, "ok", "toast_deleted"); res.redirect("/admin/services"); }
   catch (e) { next(e); }
 });
 app.post("/admin/services/:id/toggle", requireAdmin, async (req, res, next) => {
-  try { await store.toggleService(req.params.id); res.redirect("/admin/services"); }
-  catch (e) { next(e); }
+  try {
+    const pub = await store.toggleService(req.params.id);
+    setToast(req, "ok", pub ? "toast_published" : "toast_unpublished");
+    res.redirect("/admin/services");
+  } catch (e) { next(e); }
 });
 
 /* ============================================================
@@ -406,8 +466,12 @@ app.get("/admin/announcements", requireAdmin, async (req, res, next) => {
     res.render("admin/announcements", { announcements: await store.listAnnouncements(), editing: editing || null });
   } catch (e) { next(e); }
 });
-app.post("/admin/announcements", requireAdmin, upload.single("image"), async (req, res, next) => {
+app.post("/admin/announcements", requireAdmin, handleUploadSingle("image"), async (req, res, next) => {
   try {
+    if (req.uploadError) {
+      setToast(req, "error", req.uploadError);
+      return res.redirect("/admin/announcements" + (req.body.id ? `?edit=${req.body.id}` : ""));
+    }
     const title = esc(req.body.title).trim().slice(0, 200);
     if (!title) return res.redirect("/admin/announcements");
     const paths = await saveUploads(req.file ? [req.file] : []);
@@ -425,6 +489,7 @@ app.post("/admin/announcements", requireAdmin, upload.single("image"), async (re
     } else {
       await store.createAnnouncement({ ...data, image_path: paths[0] || "" });
     }
+    setToast(req, "ok", "toast_saved");
     res.redirect("/admin/announcements");
   } catch (e) { next(e); }
 });
@@ -432,12 +497,16 @@ app.post("/admin/announcements/:id/delete", requireAdmin, async (req, res, next)
   try {
     const a = await store.deleteAnnouncement(req.params.id);
     if (a) await deleteUpload(a.image_path);
+    setToast(req, "ok", "toast_deleted");
     res.redirect("/admin/announcements");
   } catch (e) { next(e); }
 });
 app.post("/admin/announcements/:id/toggle", requireAdmin, async (req, res, next) => {
-  try { await store.toggleAnnouncement(req.params.id); res.redirect("/admin/announcements"); }
-  catch (e) { next(e); }
+  try {
+    const pub = await store.toggleAnnouncement(req.params.id);
+    setToast(req, "ok", pub ? "toast_published" : "toast_unpublished");
+    res.redirect("/admin/announcements");
+  } catch (e) { next(e); }
 });
 
 /* ============================================================
@@ -477,7 +546,8 @@ app.post("/admin/content", requireAdmin, async (req, res, next) => {
       if (hasAr && key + "__ar" in req.body) entries[key + "__ar"] = esc(req.body[key + "__ar"]).slice(0, 20000);
     }
     await store.setContent(entries);
-    res.redirect("/admin/content?saved=1");
+    setToast(req, "ok", "toast_saved");
+    res.redirect("/admin/content");
   } catch (e) { next(e); }
 });
 
@@ -491,7 +561,7 @@ app.post("/admin/messages/:id/read", requireAdmin, async (req, res, next) => {
   catch (e) { next(e); }
 });
 app.post("/admin/messages/:id/delete", requireAdmin, async (req, res, next) => {
-  try { await store.deleteMessage(req.params.id); res.redirect("/admin/messages"); }
+  try { await store.deleteMessage(req.params.id); setToast(req, "ok", "toast_deleted"); res.redirect("/admin/messages"); }
   catch (e) { next(e); }
 });
 

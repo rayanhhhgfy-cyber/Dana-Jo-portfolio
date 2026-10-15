@@ -34,3 +34,9 @@
       </div>
       <a class="lang-switch-admin" href="/lang/<%= locale === 'ar' ? 'en' : 'ar' %>" aria-label="<%= t("lang_switch_label") %>" title="<%= t("lang_switch_label") %>"><%= t("lang_other") %></a>
     </div>
+    <% if (typeof toast !== "undefined" && toast) { %>
+      <div class="toast toast-<%= toast.type %>" id="toast" role="status">
+        <span class="toast-ic"><%= toast.type === "ok" ? "✓" : "!" %></span>
+        <span><%= t(toast.msgKey) %></span>
+      </div>
+    <% } %>
