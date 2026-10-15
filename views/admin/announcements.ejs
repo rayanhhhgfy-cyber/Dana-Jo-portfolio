@@ -48,4 +48,4 @@
     <div class="empty-admin"><%= t("ann_empty") %></div>
   <% } %>
 </div>
-<%- include("_bottom") %>
+<%- include("_bottom", { active: "announcements", unread: typeof unread !== "undefined" ? unread : 0 }) %>
