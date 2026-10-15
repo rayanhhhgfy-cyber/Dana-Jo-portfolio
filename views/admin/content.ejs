@@ -23,4 +23,4 @@
   <% }) %>
   <div style="margin-bottom:2rem"><button class="btn sage" type="submit"><%= t("content_save_all") %></button></div>
 </form>
-<%- include("_bottom") %>
+<%- include("_bottom", { active: "content", unread: typeof unread !== "undefined" ? unread : 0 }) %>
