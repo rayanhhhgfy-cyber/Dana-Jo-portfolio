@@ -35,7 +35,7 @@
               <div class="row-actions">
                 <a class="btn sm ghost" href="/admin/services?edit=<%= s.id %>"><%= t("btn_edit") %></a>
                 <form method="post" action="/admin/services/<%= s.id %>/toggle" style="margin:0"><button class="btn sm ghost" type="submit"><%= s.published ? t("btn_unpublish") : t("btn_publish") %></button></form>
-                <form method="post" action="/admin/services/<%= s.id %>/delete" style="margin:0" onsubmit="return confirm('<%= t("confirm_delete_service") %>')"><button class="btn sm warn-ghost" type="submit"><%= t("btn_delete") %></button></form>
+                <form method="post" action="/admin/services/<%= s.id %>/delete" style="margin:0" data-confirm="<%= t("confirm_delete_service") %>" data-confirm-title="<%= t("confirm_title") %>" data-confirm-no="<%= t("btn_cancel") %>" data-confirm-yes="<%= t("btn_delete") %>"><button class="btn sm warn-ghost" type="submit"><%= t("btn_delete") %></button></form>
               </div>
             </td>
           </tr>

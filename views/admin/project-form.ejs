@@ -51,7 +51,7 @@
                 </div>
                 <button class="btn sm ghost" type="submit" title="Save" style="width:100%">✓</button>
               </form>
-              <form method="post" action="/admin/images/<%= im.id %>/delete" style="margin:0" onsubmit="return confirm('<%= t("confirm_delete_image") %>')">
+              <form method="post" action="/admin/images/<%= im.id %>/delete" style="margin:0" data-confirm="<%= t("confirm_delete_image") %>" data-confirm-title="<%= t("confirm_title") %>" data-confirm-no="<%= t("btn_cancel") %>" data-confirm-yes="<%= t("btn_delete") %>">
                 <button class="btn sm warn-ghost" type="submit" style="width:100%"><%= t("btn_delete") %></button>
               </form>
             </div>
@@ -69,7 +69,7 @@
   </div>
 </form>
 <% if (project && project.cover_image) { %>
-<form method="post" action="/admin/projects/<%= project.id %>/cover-clear" onsubmit="return confirm('<%= t("confirm_remove_cover") %>')" style="margin:-1rem 0 2rem">
+<form method="post" action="/admin/projects/<%= project.id %>/cover-clear" data-confirm="<%= t("confirm_remove_cover") %>" data-confirm-title="<%= t("confirm_title") %>" data-confirm-no="<%= t("btn_cancel") %>" data-confirm-yes="<%= t("btn_delete") %>" style="margin:-1rem 0 2rem">
   <button class="btn sm warn-ghost" type="submit"><%= t("pf_remove_cover") %></button>
 </form>
 <% } %>
