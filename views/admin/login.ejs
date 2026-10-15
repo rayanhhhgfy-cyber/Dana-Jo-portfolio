@@ -10,7 +10,7 @@
 <body>
 <div class="login-wrap">
   <div class="login-card">
-    <a class="lang-switch-admin" href="/lang/<%= locale === 'ar' ? 'en' : 'ar' %>" aria-label="<%= t("lang_switch_label") %>" title="<%= t("lang_switch_label") %>" style="align-self:flex-end"><%= t("lang_other") %></a>
+    <a class="lang-switch-admin" href="/lang/<%= locale === 'ar' ? 'en' : 'ar' %>?next=<%= encodeURIComponent(currentPath) %>" aria-label="<%= t("lang_switch_label") %>" title="<%= t("lang_switch_label") %>" style="align-self:flex-end"><%= t("lang_other") %></a>
     <h1><%= t("login_h") %></h1>
     <p><%= t("login_p") %></p>
     <% if (error) { %><div class="alert err"><%= error %></div><% } %>
