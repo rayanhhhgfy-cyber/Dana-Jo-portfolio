@@ -73,4 +73,4 @@
   <button class="btn sm warn-ghost" type="submit"><%= t("pf_remove_cover") %></button>
 </form>
 <% } %>
-<%- include("_bottom") %>
+<%- include("_bottom", { active: "projects", unread: typeof unread !== "undefined" ? unread : 0 }) %>
