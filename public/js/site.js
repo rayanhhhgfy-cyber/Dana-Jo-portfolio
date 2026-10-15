@@ -62,18 +62,6 @@
     });
   }
 
-  /* ---------- WOW: floating sparkles in hero ---------- */
-  var hero = document.querySelector(".hero");
-  if (hero && !hero.querySelector(".hero-spark")) {
-    ["s1", "s2"].forEach(function (cls) {
-      var s = document.createElement("span");
-      s.className = "hero-spark " + cls;
-      s.setAttribute("aria-hidden", "true");
-      s.textContent = "✳";
-      hero.appendChild(s);
-    });
-  }
-
   /* ---------- WOW: count-up stats ---------- */
   var counters = document.querySelectorAll(".hstat b");
   function countUp(el) {
