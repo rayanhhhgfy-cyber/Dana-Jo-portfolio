@@ -551,3 +551,132 @@ main { padding-top: 0; }
   [dir="rtl"] .hero-d { right: auto; left: 2vw; }
   [dir="rtl"] .stamp { right: auto; left: 4vw; }
 }
+
+/* ============================================================
+   WOW LAYER — mobile-first delight (appended 2026-10-16)
+   Ambient depth, tactile feedback, cinematic motion.
+   All GPU-friendly (transform/opacity only). Respects
+   prefers-reduced-motion.
+============================================================ */
+
+/* ambient atmosphere — barely-there color fields */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(55% 38% at 88% 6%, rgba(120,134,107,0.10), transparent 70%),
+    radial-gradient(48% 34% at 6% 42%, rgba(216,198,174,0.14), transparent 70%),
+    radial-gradient(52% 36% at 92% 88%, rgba(120,134,107,0.07), transparent 70%);
+}
+main, .site-header, .site-footer { position: relative; z-index: 1; }
+
+/* cleaner touch feel + brand selection */
+* { -webkit-tap-highlight-color: transparent; }
+::selection { background: var(--sage); color: #fff; }
+html { scroll-behavior: smooth; }
+
+/* ---------- hero headline: word-by-word cinematic rise ---------- */
+.hero-title .w {
+  display: inline-block; will-change: transform, opacity;
+}
+.js .hero-title .w {
+  opacity: 0; transform: translateY(0.55em) rotate(2.5deg);
+}
+.js .hero-title.words-in .w {
+  opacity: 1; transform: none;
+  transition: opacity 0.75s var(--ease-out), transform 0.85s var(--ease-out);
+}
+/* gradient ink on the tagline */
+.hero-title .amp {
+  background: linear-gradient(115deg, var(--sage-deep) 20%, #a3b194 60%, var(--sage-deep) 90%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: sheen 7s linear infinite;
+}
+@keyframes sheen { to { background-position: 200% center; } }
+
+/* hero entrance glow pulse */
+.hero::after {
+  content: ""; position: absolute; left: 50%; top: 34%; width: 78vw; height: 78vw;
+  max-width: 520px; max-height: 520px; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(216,198,174,0.35), transparent 65%);
+  filter: blur(10px); pointer-events: none; z-index: 0;
+  animation: breathe 6s ease-in-out infinite;
+}
+@keyframes breathe { 50% { transform: translate(-50%, -50%) scale(1.12); opacity: 0.7; } }
+.hero-inner { position: relative; z-index: 1; }
+
+/* ---------- buttons: shine sweep + tactile press ---------- */
+.btn { position: relative; overflow: hidden; }
+.btn::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -70%; width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.38), transparent);
+  transform: skewX(-22deg); transition: left 0.65s ease; pointer-events: none;
+}
+.btn:hover::after, .btn:active::after { left: 135%; }
+.btn:active { transform: scale(0.965); }
+.btn { transition: transform 0.18s ease, background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s; }
+
+/* ---------- tactile cards ---------- */
+.work-card, .svc-row { transition: transform 0.2s ease, box-shadow 0.35s ease, background 0.35s ease; }
+.work-card:active { transform: scale(0.975); }
+.svc-row:active { transform: scale(0.985); }
+.work-card { -webkit-user-select: none; user-select: none; }
+
+/* ---------- reveals with cinematic blur ---------- */
+.js .reveal {
+  opacity: 0; transform: translateY(30px); filter: blur(8px);
+  transition: opacity 0.9s var(--ease-out), transform 1s var(--ease-out), filter 0.9s var(--ease-out);
+}
+.js .reveal.in { opacity: 1; transform: none; filter: blur(0); }
+
+/* ---------- eyebrow line grows in ---------- */
+.eyebrow::before { transform: scaleX(0); transform-origin: left; transition: transform 1s var(--ease-out) 0.15s; }
+.js .reveal.in .eyebrow::before, .eyebrow.in::before { transform: scaleX(1); }
+[dir="rtl"] .eyebrow::before { transform-origin: right; }
+
+/* ---------- scroll cue bounce ---------- */
+.scroll-cue { animation: cueFloat 2.2s ease-in-out infinite; }
+@keyframes cueFloat { 50% { transform: translate(-50%, 8px); } }
+
+/* ---------- marquee: luminous edge ---------- */
+.marquee-wrap {
+  box-shadow: 0 18px 40px -22px rgba(32,32,30,0.45);
+  position: relative;
+}
+.marquee-wrap::after {
+  content: ""; position: absolute; inset: auto 0 0 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(216,198,174,0.6), transparent);
+}
+
+/* ---------- stat count-up pop ---------- */
+.hstat b { display: inline-block; }
+.hstat b.tick { animation: tick 0.5s var(--ease-out); }
+@keyframes tick { 30% { transform: translateY(-6px) scale(1.06); } }
+
+/* ---------- floating sparkle near hero ---------- */
+.hero-spark {
+  position: absolute; z-index: 1; color: var(--sage-deep); opacity: 0.85;
+  font-size: 1.35rem; pointer-events: none;
+  animation: sparkFloat 5.5s ease-in-out infinite;
+}
+.hero-spark.s1 { top: 16%; inset-inline-end: 12%; animation-delay: 0.6s; }
+.hero-spark.s2 { top: 58%; inset-inline-start: 8%; font-size: 1rem; animation-delay: 2.1s; }
+@keyframes sparkFloat {
+  50% { transform: translateY(-14px) rotate(18deg); opacity: 0.45; }
+}
+
+/* ---------- footer wordmark shimmer ---------- */
+.foot-word {
+  background: linear-gradient(110deg, #f7f5f0 30%, #d8c6ae 48%, #f7f5f0 62%);
+  background-size: 220% auto;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: sheen 8s linear infinite;
+}
+
+/* ---------- reduced motion: keep it calm ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .hero-title .amp, .hero::after, .scroll-cue, .hero-spark, .foot-word { animation: none !important; }
+  .js .hero-title .w { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .js .reveal { filter: none !important; }
+  html { scroll-behavior: auto; }
+}
