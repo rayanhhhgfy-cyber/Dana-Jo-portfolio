@@ -24,4 +24,4 @@
     <div class="empty-admin"><%= t("msg_empty") %></div>
   <% } %>
 </div>
-<%- include("_bottom") %>
+<%- include("_bottom", { active: "messages", unread: typeof unread !== "undefined" ? unread : 0 }) %>
